@@ -1,0 +1,190 @@
+-- ============================================================
+-- Vibe Open World — Database Seed Script
+-- 在 Neon / Vercel Postgres SQL Editor 中执行
+-- ============================================================
+
+-- 1. Categories
+INSERT INTO categories (name, slug, description, icon, sort_order) VALUES
+  ('SaaS', 'saas', 'Software as a Service projects', '☁️', 1),
+  ('Productivity', 'productivity', 'Tools that boost productivity', '⚡', 2),
+  ('Finance', 'finance', 'Finance and fintech projects', '💰', 3),
+  ('Education', 'education', 'Learning and education tools', '📚', 4),
+  ('AI Tools', 'ai-tools', 'AI-powered applications', '🤖', 5),
+  ('Games', 'games', 'Games and interactive experiences', '🎮', 6),
+  ('Mobile Apps', 'mobile-apps', 'Mobile applications', '📱', 7),
+  ('Developer Tools', 'developer-tools', 'Tools for developers', '🛠️', 8),
+  ('Other', 'other', 'Everything else', '📦', 9);
+
+-- 2. AI Tools
+INSERT INTO ai_tools (name, slug, website) VALUES
+  ('Claude Code', 'claude-code', 'https://claude.ai'),
+  ('Cursor', 'cursor', 'https://cursor.sh'),
+  ('Bolt', 'bolt', 'https://bolt.new'),
+  ('Lovable', 'lovable', 'https://lovable.dev'),
+  ('v0', 'v0', 'https://v0.dev'),
+  ('Windsurf', 'windsurf', 'https://codeium.com/windsurf'),
+  ('GitHub Copilot', 'github-copilot', 'https://github.com/features/copilot'),
+  ('Replit Agent', 'replit-agent', 'https://replit.com'),
+  ('Devin', 'devin', 'https://devin.ai'),
+  ('Tempo', 'tempo', 'https://tempo.new'),
+  ('Cline', 'cline', 'https://cline.bot'),
+  ('Aider', 'aider', 'https://aider.chat'),
+  ('Other', 'other', NULL);
+
+-- 3. Demo Authors
+INSERT INTO authors (id, name, twitter, github) VALUES
+  ('a0000000-0000-0000-0000-000000000001', 'Sarah Chen', '@sarahchen', 'sarahchen'),
+  ('a0000000-0000-0000-0000-000000000002', 'Marcus Rivera', '@marcusdev', 'marcusrivera'),
+  ('a0000000-0000-0000-0000-000000000003', 'Alex Kim', '@alexkim', 'alexkim'),
+  ('a0000000-0000-0000-0000-000000000004', 'Priya Sharma', '@priyacodes', 'priyasharma'),
+  ('a0000000-0000-0000-0000-000000000005', 'Tom Baker', '@tombaker', 'tombaker'),
+  ('a0000000-0000-0000-0000-000000000006', 'Lena Müller', '@lenacodes', 'lenamueller');
+
+-- 4. Demo Projects
+INSERT INTO projects (title, slug, tagline, description, url, github_url, screenshot_url, category_id, author_id, status, dev_duration, is_profitable, published_at) VALUES
+  (
+    'HabitForge', 'habitforge',
+    'AI-powered habit tracker that learns your patterns and adapts reminders',
+    'HabitForge uses Claude Code to build a smart habit tracking system that analyzes your behavior patterns and suggests optimal times for habit formation. Built entirely with AI assistance in just 3 weeks.',
+    'https://habitforge.app',
+    'https://github.com/sarahchen/habitforge',
+    'https://placehold.co/1200x750/FFF7ED/F97316?text=HabitForge',
+    (SELECT id FROM categories WHERE slug = 'productivity'),
+    'a0000000-0000-0000-0000-000000000001',
+    'featured', '3 weeks', true, NOW() - INTERVAL '7 days'
+  ),
+  (
+    'DevRelay', 'devrelay',
+    'Real-time developer collaboration tool with AI code review',
+    'DevRelay connects developers in real-time with AI-powered code review. Built with Cursor and Claude Code. Features include live collaboration, automated PR reviews, and intelligent conflict resolution.',
+    'https://devrelay.io',
+    'https://github.com/marcusrivera/devrelay',
+    'https://placehold.co/1200x750/EEF2FF/4F46E5?text=DevRelay',
+    (SELECT id FROM categories WHERE slug = 'developer-tools'),
+    'a0000000-0000-0000-0000-000000000002',
+    'featured', '2 months', false, NOW() - INTERVAL '5 days'
+  ),
+  (
+    'FinSight', 'finsight',
+    'Personal finance dashboard with AI spending predictions',
+    'A beautiful personal finance dashboard that uses AI to predict your spending patterns and suggest budget optimizations. Built with Bolt and Windsurf.',
+    'https://finsight.co',
+    NULL,
+    'https://placehold.co/1200x750/ECFDF5/10B981?text=FinSight',
+    (SELECT id FROM categories WHERE slug = 'finance'),
+    'a0000000-0000-0000-0000-000000000003',
+    'featured', '1 month', true, NOW() - INTERVAL '14 days'
+  ),
+  (
+    'LingoSpark', 'lingospark',
+    'Learn languages through AI-generated interactive stories',
+    'LingoSpark creates personalized language learning experiences through AI-generated stories that adapt to your proficiency level. Built over a weekend with Lovable.',
+    'https://lingospark.com',
+    'https://github.com/priyasharma/lingospark',
+    'https://placehold.co/1200x750/FEF3C7/F59E0B?text=LingoSpark',
+    (SELECT id FROM categories WHERE slug = 'education'),
+    'a0000000-0000-0000-0000-000000000004',
+    'approved', '2 days', false, NOW() - INTERVAL '3 days'
+  ),
+  (
+    'PixelQuest', 'pixelquest',
+    'AI-generated pixel art RPG with infinite quests',
+    'An RPG where every quest, character, and dialogue is generated by AI. Built entirely with Cursor and Claude Code. Explore infinite worlds created on the fly.',
+    'https://pixelquest.game',
+    'https://github.com/tombaker/pixelquest',
+    'https://placehold.co/1200x750/FCE7F3/EC4899?text=PixelQuest',
+    (SELECT id FROM categories WHERE slug = 'games'),
+    'a0000000-0000-0000-0000-000000000005',
+    'approved', '3 months', false, NOW() - INTERVAL '10 days'
+  ),
+  (
+    'MailMuse', 'mailmuse',
+    'AI email assistant that drafts replies in your voice',
+    'MailMuse analyzes your email writing style and drafts replies that sound exactly like you. Built in a single weekend with Claude Code and v0 for the UI.',
+    'https://mailmuse.app',
+    NULL,
+    'https://placehold.co/1200x750/EEF2FF/6366F1?text=MailMuse',
+    (SELECT id FROM categories WHERE slug = 'ai-tools'),
+    'a0000000-0000-0000-0000-000000000006',
+    'approved', '2 days', true, NOW() - INTERVAL '2 days'
+  ),
+  (
+    'SaaSBoilerplate', 'saasboilerplate',
+    'Next.js SaaS starter with auth, payments, and AI integration',
+    'A production-ready SaaS boilerplate with Next.js, Supabase, Stripe, and AI integration. Built to help solo developers ship faster. Created with Cursor.',
+    'https://saasboilerplate.dev',
+    'https://github.com/sarahchen/saasboilerplate',
+    'https://placehold.co/1200x750/F8FAFC/0F172A?text=SaaSBoilerplate',
+    (SELECT id FROM categories WHERE slug = 'saas'),
+    'a0000000-0000-0000-0000-000000000001',
+    'approved', '1 month', true, NOW() - INTERVAL '20 days'
+  ),
+  (
+    'WeatherVane', 'weathervane',
+    'Hyper-local weather app with AI-powered activity recommendations',
+    'WeatherVane combines hyper-local weather data with AI to recommend outdoor activities, what to wear, and when to plan events. Mobile-first, built with Windsurf.',
+    'https://weathervane.app',
+    NULL,
+    'https://placehold.co/1200x750/E0F2FE/0284C7?text=WeatherVane',
+    (SELECT id FROM categories WHERE slug = 'mobile-apps'),
+    'a0000000-0000-0000-0000-000000000005',
+    'approved', '1 week', false, NOW() - INTERVAL '1 days'
+  );
+
+-- 5. Project ↔ AI Tools
+INSERT INTO project_ai_tools (project_id, ai_tool_id)
+SELECT p.id, t.id FROM projects p, ai_tools t
+WHERE p.slug = 'habitforge' AND t.slug = 'claude-code';
+
+INSERT INTO project_ai_tools (project_id, ai_tool_id)
+SELECT p.id, t.id FROM projects p, ai_tools t
+WHERE p.slug = 'devrelay' AND t.slug IN ('cursor', 'claude-code');
+
+INSERT INTO project_ai_tools (project_id, ai_tool_id)
+SELECT p.id, t.id FROM projects p, ai_tools t
+WHERE p.slug = 'finsight' AND t.slug IN ('bolt', 'windsurf');
+
+INSERT INTO project_ai_tools (project_id, ai_tool_id)
+SELECT p.id, t.id FROM projects p, ai_tools t
+WHERE p.slug = 'lingospark' AND t.slug = 'lovable';
+
+INSERT INTO project_ai_tools (project_id, ai_tool_id)
+SELECT p.id, t.id FROM projects p, ai_tools t
+WHERE p.slug = 'pixelquest' AND t.slug IN ('cursor', 'claude-code');
+
+INSERT INTO project_ai_tools (project_id, ai_tool_id)
+SELECT p.id, t.id FROM projects p, ai_tools t
+WHERE p.slug = 'mailmuse' AND t.slug IN ('claude-code', 'v0');
+
+INSERT INTO project_ai_tools (project_id, ai_tool_id)
+SELECT p.id, t.id FROM projects p, ai_tools t
+WHERE p.slug = 'saasboilerplate' AND t.slug = 'cursor';
+
+INSERT INTO project_ai_tools (project_id, ai_tool_id)
+SELECT p.id, t.id FROM projects p, ai_tools t
+WHERE p.slug = 'weathervane' AND t.slug = 'windsurf';
+
+-- 6. Project ↔ Tech Stack
+INSERT INTO project_tech_stack (project_id, tech_name) VALUES
+  ((SELECT id FROM projects WHERE slug = 'habitforge'), 'Next.js'),
+  ((SELECT id FROM projects WHERE slug = 'habitforge'), 'Supabase'),
+  ((SELECT id FROM projects WHERE slug = 'habitforge'), 'Tailwind CSS'),
+  ((SELECT id FROM projects WHERE slug = 'devrelay'), 'React'),
+  ((SELECT id FROM projects WHERE slug = 'devrelay'), 'Node.js'),
+  ((SELECT id FROM projects WHERE slug = 'devrelay'), 'PostgreSQL'),
+  ((SELECT id FROM projects WHERE slug = 'devrelay'), 'WebSocket'),
+  ((SELECT id FROM projects WHERE slug = 'finsight'), 'Vue.js'),
+  ((SELECT id FROM projects WHERE slug = 'finsight'), 'Python'),
+  ((SELECT id FROM projects WHERE slug = 'finsight'), 'FastAPI'),
+  ((SELECT id FROM projects WHERE slug = 'lingospark'), 'Svelte'),
+  ((SELECT id FROM projects WHERE slug = 'lingospark'), 'OpenAI'),
+  ((SELECT id FROM projects WHERE slug = 'pixelquest'), 'Phaser.js'),
+  ((SELECT id FROM projects WHERE slug = 'pixelquest'), 'Node.js'),
+  ((SELECT id FROM projects WHERE slug = 'mailmuse'), 'Next.js'),
+  ((SELECT id FROM projects WHERE slug = 'mailmuse'), 'Gmail API'),
+  ((SELECT id FROM projects WHERE slug = 'mailmuse'), 'OpenAI'),
+  ((SELECT id FROM projects WHERE slug = 'saasboilerplate'), 'Next.js'),
+  ((SELECT id FROM projects WHERE slug = 'saasboilerplate'), 'Supabase'),
+  ((SELECT id FROM projects WHERE slug = 'saasboilerplate'), 'Stripe'),
+  ((SELECT id FROM projects WHERE slug = 'weathervane'), 'React Native'),
+  ((SELECT id FROM projects WHERE slug = 'weathervane'), 'Expo');

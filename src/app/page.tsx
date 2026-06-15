@@ -78,10 +78,11 @@ async function getHomePageData(): Promise<{
 export default async function HomePage() {
   const { featured, latest, popular, categories, stats } = await getHomePageData();
   const hasProjects = featured.length > 0 || latest.length > 0;
+  const allProjects = [...featured, ...latest];
 
   return (
     <>
-      <HeroSection />
+      <HeroSection projects={allProjects} />
 
       {!hasProjects ? (
         <Section topPadding={false}>

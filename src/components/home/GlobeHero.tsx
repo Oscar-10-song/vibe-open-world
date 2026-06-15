@@ -1,9 +1,34 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, Component } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import type { ProjectWithRelations } from '@/types';
+
+// ============================================================
+// Error Boundary — catches globe failures without crashing page
+// ============================================================
+class GlobeErrorBoundary extends Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode; fallback: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('GlobeErrorBoundary caught:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
 
 // Dynamic import — no SSR for WebGL/Three.js
 const GlobeScene = dynamic(() => import('./GlobeScene').then(m => ({ default: m.GlobeScene })), {
@@ -28,6 +53,8 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
   const [selectedProject, setSelectedProject] = useState<ProjectWithRelations | null>(null);
   const [cardVisible, setCardVisible] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // Stable ref for click callback — prevents globe re-init on every state change
+  const onProjectClickRef = useRef<((project: ProjectWithRelations) => void) | undefined>(undefined);
 
   const handleProjectClick = useCallback((project: ProjectWithRelations) => {
     // Dismiss current card if clicking the same point
@@ -41,6 +68,9 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
     timeoutRef.current = setTimeout(() => setCardVisible(true), 50);
   }, [selectedProject, cardVisible]);
 
+  // Keep ref in sync with latest callback
+  onProjectClickRef.current = handleProjectClick;
+
   const dismissCard = useCallback(() => {
     setCardVisible(false);
     timeoutRef.current = setTimeout(() => setSelectedProject(null), 300);
@@ -52,8 +82,20 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
 
   return (
     <section className="relative h-screen min-h-[600px] max-h-[900px] overflow-hidden bg-[#000011]">
-      {/* 3D Globe background */}
-      <GlobeScene projects={projects} onProjectClick={handleProjectClick} />
+      {/* 3D Globe background — isolated error boundary */}
+      <GlobeErrorBoundary
+        fallback={
+          <div className="absolute inset-0 bg-[#000011] flex items-center justify-center">
+            <div className="text-center">
+              <span className="text-6xl mb-4 block">🌍</span>
+              <p className="text-sm text-white/40 font-mono">Globe unavailable</p>
+              <p className="text-xs text-white/20 mt-2">Try a WebGL-enabled browser</p>
+            </div>
+          </div>
+        }
+      >
+        <GlobeScene projects={projects} onProjectClickRef={onProjectClickRef} />
+      </GlobeErrorBoundary>
 
       {/* Top-left gradient vignette */}
       <div

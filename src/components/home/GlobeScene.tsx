@@ -17,7 +17,8 @@ interface GlobePoint {
 
 interface GlobeSceneProps {
   projects: ProjectWithRelations[];
-  onProjectClick?: (project: ProjectWithRelations) => void;
+  /** Stable ref-based callback — won't trigger globe re-init on re-render */
+  onProjectClickRef: React.MutableRefObject<((project: ProjectWithRelations) => void) | undefined>;
 }
 
 // ============================================================
@@ -118,7 +119,7 @@ function generatePoints(projects: ProjectWithRelations[]): GlobePoint[] {
 // ============================================================
 // GlobeScene Component
 // ============================================================
-export function GlobeScene({ projects, onProjectClick }: GlobeSceneProps) {
+export function GlobeScene({ projects, onProjectClickRef }: GlobeSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const globeEl = useRef<any>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -168,10 +169,10 @@ export function GlobeScene({ projects, onProjectClick }: GlobeSceneProps) {
         .pointAltitude(0.005)
         .pointRadius((p: any) => p.size)
         .pointLabel((p: any) => p.label || '')
-        // Click
+        // Click — use ref to always call latest callback without re-init
         .onPointClick((p: GlobePoint) => {
-          if (p.project && onProjectClick) {
-            onProjectClick(p.project);
+          if (p.project && onProjectClickRef.current) {
+            onProjectClickRef.current(p.project);
           }
         })
         // Interaction
@@ -197,7 +198,8 @@ export function GlobeScene({ projects, onProjectClick }: GlobeSceneProps) {
       setErrorMsg(err.message || 'Failed to initialize globe');
       setStatus('error');
     }
-  }, [projects, onProjectClick]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projects]); // onProjectClickRef is a ref, doesn't need to be a dep
 
   useEffect(() => {
     let cancelled = false;

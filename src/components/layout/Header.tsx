@@ -1,3 +1,4 @@
+// @deprecated — replaced by NavBar.tsx as part of v2 redesign
 'use client';
 
 import Link from 'next/link';

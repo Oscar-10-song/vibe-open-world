@@ -1,4 +1,4 @@
-import { GlobeHero } from '@/components/home/GlobeHero';
+import { VideoHero } from '@/components/home/VideoHero';
 import { StatsSection } from '@/components/home/StatsSection';
 import { FeaturedWorks } from '@/components/home/FeaturedWorks';
 import { TopCountries } from '@/components/home/TopCountries';
@@ -78,15 +78,14 @@ async function getHomePageData(): Promise<{
 // ============================================================
 export default async function HomePage() {
   const { featured, latest, popular, categories, stats } = await getHomePageData();
-  const allProjects = [...featured, ...latest];
-  const hasProjects = allProjects.length > 0;
+  const hasProjects = featured.length > 0 || latest.length > 0;
 
   return (
     <>
       {/* ============================================================
-          1. Hero — Globe + Text
+          1. Hero — Full-screen video background
           ============================================================ */}
-      <GlobeHero projects={allProjects} />
+      <VideoHero />
 
       {/* ============================================================
           2. Global Stats — Animated counters

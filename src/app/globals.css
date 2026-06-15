@@ -5,44 +5,44 @@
    Stripe + GitHub + Linear 风格
    ============================================================ */
 
-/* ---- CSS Variables ---- */
+/* ---- CSS Variables (light theme by default) ---- */
 :root {
   /* Background */
-  --color-bg: #08080f;
-  --color-bg-secondary: #0c0c18;
-  --color-bg-tertiary: #111122;
-  --color-surface: #0f0f1e;
-  --color-surface-hover: #15152a;
-  --color-border: rgba(255, 255, 255, 0.06);
-  --color-border-hover: rgba(255, 255, 255, 0.12);
-  --color-border-strong: rgba(255, 255, 255, 0.1);
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f8f8f8;
+  --color-bg-tertiary: #f2f2f2;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f5f5f5;
+  --color-border: rgba(0, 0, 0, 0.06);
+  --color-border-hover: rgba(0, 0, 0, 0.12);
+  --color-border-strong: rgba(0, 0, 0, 0.1);
 
   /* Text */
-  --color-text: #f0f0f5;
-  --color-text-secondary: #8888a0;
-  --color-text-tertiary: #5c5c78;
+  --color-text: #0f1419;
+  --color-text-secondary: #505050;
+  --color-text-tertiary: #8b98a5;
 
-  /* Accent — warm orange for CTAs */
+  /* Accent */
   --color-accent: #f97316;
-  --color-accent-hover: #fb923c;
-  --color-accent-subtle: rgba(249, 115, 22, 0.08);
-  --color-accent-text: #fdba74;
+  --color-accent-hover: #ea580c;
+  --color-accent-subtle: rgba(249, 115, 22, 0.06);
+  --color-accent-text: #c2410c;
 
-  /* Accent Blue — for globe/scientific feel */
+  /* Accent Blue */
   --color-accent-blue: #3b82f6;
-  --color-accent-blue-subtle: rgba(59, 130, 246, 0.08);
+  --color-accent-blue-subtle: rgba(59, 130, 246, 0.06);
 
   /* Functional */
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
 
-  /* Shadows — subtle on dark bg */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.04);
-  --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.15);
+  /* Shadows — subtle for light bg */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 30px rgba(0, 0, 0, 0.04);
 
   /* Radius */
   --radius-sm: 6px;
@@ -60,7 +60,7 @@
   --transition-normal: 250ms ease;
   --transition-slow: 400ms ease;
 
-  /* Hero-specific palette (light-oriented design) */
+  /* Hero-specific palette */
   --hero-black: #000000;
   --hero-gray: #505050;
   --hero-light-bg: #f8f8f8;
@@ -75,23 +75,24 @@
   --font-noto: var(--font-noto-sans), system-ui, sans-serif;
 }
 
-/* ---- Light mode (for users who prefer it — dark is default) ---- */
-.light {
-  --color-bg: #fafafa;
-  --color-bg-secondary: #f4f4f5;
-  --color-bg-tertiary: #eaeaec;
-  --color-surface: #ffffff;
-  --color-surface-hover: #f8f8fa;
-  --color-border: rgba(0, 0, 0, 0.06);
-  --color-border-hover: rgba(0, 0, 0, 0.12);
-  --color-border-strong: rgba(0, 0, 0, 0.1);
-  --color-text: #0f1419;
-  --color-text-secondary: #536471;
-  --color-text-tertiary: #8b98a5;
-  --color-accent-subtle: rgba(249, 115, 22, 0.06);
-  --color-accent-text: #c2410c;
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.06);
+/* ---- Dark mode override (preserved for admin pages) ---- */
+.dark {
+  --color-bg: #08080f;
+  --color-bg-secondary: #0c0c18;
+  --color-bg-tertiary: #111122;
+  --color-surface: #0f0f1e;
+  --color-surface-hover: #15152a;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-hover: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.1);
+  --color-text: #f0f0f5;
+  --color-text-secondary: #8888a0;
+  --color-text-tertiary: #5c5c78;
+  --color-accent-subtle: rgba(249, 115, 22, 0.08);
+  --color-accent-text: #fdba74;
+  --color-accent-blue-subtle: rgba(59, 130, 246, 0.08);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.15);
 }
 
 /* ---- Tailwind v4 Theme ---- */
@@ -112,8 +113,8 @@ body {
 }
 
 ::selection {
-  background: rgba(249, 115, 22, 0.3);
-  color: white;
+  background: rgba(249, 115, 22, 0.2);
+  color: var(--color-text);
 }
 
 /* ---- Utilities ---- */

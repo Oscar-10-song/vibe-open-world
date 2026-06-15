@@ -107,10 +107,10 @@ export default async function HomePage() {
           <Container className="text-center">
             <div className="max-w-lg mx-auto py-16">
               <span className="text-6xl mb-6 block">🚀</span>
-              <h2 className="text-2xl font-bold text-white mb-3">
+              <h2 className="text-2xl font-bold text-[#0f1419] mb-3">
                 Be the First to Share
               </h2>
-              <p className="text-white/30 leading-relaxed">
+              <p className="text-[#505050] leading-relaxed">
                 No projects have been submitted yet. Submit yours and kickstart the directory!
               </p>
             </div>
@@ -123,10 +123,10 @@ export default async function HomePage() {
           ============================================================ */}
       <Section topPadding={false}>
         <Container>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#0f1419] text-center mb-3">
             Browse by Category
           </h2>
-          <p className="text-sm text-white/30 text-center mb-10">
+          <p className="text-sm text-[#505050] text-center mb-10">
             Explore AI creations across every medium
           </p>
           <CategoryNav categories={categories} />

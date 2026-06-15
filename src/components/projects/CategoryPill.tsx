@@ -14,8 +14,8 @@ export function CategoryPill({ name, slug, icon, active = false }: CategoryPillP
       className={[
         'inline-flex items-center gap-1.5 px-4 py-2 text-sm rounded-full font-medium transition-all duration-200 whitespace-nowrap',
         active
-          ? 'bg-indigo-500 text-white shadow-[0_0_20px_rgba(99,102,241,0.3)]'
-          : 'bg-white/[0.03] text-white/45 border border-white/[0.06] hover:text-white/70 hover:bg-white/[0.06] hover:border-white/[0.1]',
+          ? 'bg-[#0f1419] text-white'
+          : 'bg-white border border-black/[0.06] text-[#505050] hover:text-[#0f1419] hover:border-black/[0.12] hover:bg-[#f8f8f8]',
       ].join(' ')}
     >
       {icon && <span>{icon}</span>}

@@ -22,7 +22,6 @@ function useCountUp(end: number, duration: number, startCounting: boolean) {
       }
       const elapsed = timestamp - startTimeRef.current;
       const progress = Math.min(elapsed / duration, 1);
-      // ease-out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setCount(Math.floor(eased * end));
 
@@ -71,13 +70,13 @@ function StatItem({
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className="text-center"
     >
-      <p className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tabular-nums tracking-tight">
+      <p className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#0f1419] tabular-nums tracking-tight">
         {displayValue}
         {suffix && (
-          <span className="text-white/20">{suffix}</span>
+          <span className="text-[#8b98a5]">{suffix}</span>
         )}
       </p>
-      <p className="mt-2 text-sm text-white/35 font-medium tracking-wide">
+      <p className="mt-2 text-sm text-[#505050] font-medium tracking-wide">
         {label}
       </p>
     </motion.div>
@@ -96,15 +95,7 @@ interface StatsSectionProps {
 
 export function StatsSection({ totalProjects, totalBuilders, totalCategories, newToday }: StatsSectionProps) {
   return (
-    <section className="relative py-24 sm:py-32 overflow-hidden">
-      {/* Subtle bg glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.04) 0%, transparent 70%)',
-        }}
-      />
-
+    <section className="relative py-24 sm:py-32 overflow-hidden bg-white">
       <Container>
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -113,10 +104,10 @@ export function StatsSection({ totalProjects, totalBuilders, totalCategories, ne
           transition={{ duration: 0.5 }}
           className="text-center mb-14"
         >
-          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#0f1419] tracking-tight">
             Global AI Creation Stats
           </h2>
-          <p className="mt-3 text-base text-white/30 max-w-md mx-auto">
+          <p className="mt-3 text-base text-[#505050] max-w-md mx-auto">
             Tracking the pulse of AI-powered creativity across the world
           </p>
         </motion.div>
@@ -129,8 +120,7 @@ export function StatsSection({ totalProjects, totalBuilders, totalCategories, ne
               label="Total Works"
               index={0}
             />
-            {/* Decorative line on large screens */}
-            <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-12 bg-white/[0.06]" />
+            <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-12 bg-black/[0.06]" />
           </div>
           <div className="relative">
             <StatItem
@@ -139,7 +129,7 @@ export function StatsSection({ totalProjects, totalBuilders, totalCategories, ne
               label="Total Creators"
               index={1}
             />
-            <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-12 bg-white/[0.06]" />
+            <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-12 bg-black/[0.06]" />
           </div>
           <div className="relative">
             <StatItem
@@ -147,7 +137,7 @@ export function StatsSection({ totalProjects, totalBuilders, totalCategories, ne
               label="Countries Covered"
               index={2}
             />
-            <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-12 bg-white/[0.06]" />
+            <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-12 bg-black/[0.06]" />
           </div>
           <div>
             <StatItem

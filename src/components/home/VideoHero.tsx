@@ -19,12 +19,8 @@ export function VideoHero() {
           loop
           playsInline
           preload="auto"
-          className="absolute top-0 left-1/2 -translate-x-1/2 h-[115%]"
-          style={{
-            width: '115%',
-            objectFit: 'cover',
-            objectPosition: 'top',
-          }}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ objectPosition: 'top' }}
         />
         {/* Overlay */}
         <div

@@ -9,28 +9,51 @@ import type { ProjectWithRelations } from '@/types';
 // Error Boundary — catches globe failures without crashing page
 // ============================================================
 class GlobeErrorBoundary extends Component<
-  { children: React.ReactNode; fallback: React.ReactNode },
-  { hasError: boolean }
+  { children: React.ReactNode },
+  { hasError: boolean; errorMessage: string }
 > {
-  constructor(props: { children: React.ReactNode; fallback: React.ReactNode }) {
+  constructor(props: { children: React.ReactNode }) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, errorMessage: '' };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error) {
+    return {
+      hasError: true,
+      errorMessage: error?.message || error?.toString?.() || 'Unknown error',
+    };
   }
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('GlobeErrorBoundary caught:', error, errorInfo);
+    console.error('[GlobeErrorBoundary] Caught:', error?.message, errorInfo?.componentStack);
   }
   render() {
     if (this.state.hasError) {
-      return this.props.fallback;
+      return (
+        <div className="absolute inset-0 bg-[#000011] flex items-center justify-center">
+          <div className="text-center max-w-md px-6">
+            <span className="text-6xl mb-4 block">🌍</span>
+            <p className="text-sm text-white/40 font-mono">Globe unavailable</p>
+            <details className="mt-3">
+              <summary className="text-xs text-white/15 cursor-pointer hover:text-white/25 font-mono">
+                Error details
+              </summary>
+              <p className="text-xs text-white/15 mt-2 font-mono break-all leading-relaxed">
+                {this.state.errorMessage}
+              </p>
+            </details>
+            <p className="text-xs text-white/15 mt-3">
+              The rest of the page is still available below.
+            </p>
+          </div>
+        </div>
+      );
     }
     return this.props.children;
   }
 }
 
+// ============================================================
 // Dynamic import — no SSR for WebGL/Three.js
+// ============================================================
 const GlobeScene = dynamic(() => import('./GlobeScene').then(m => ({ default: m.GlobeScene })), {
   ssr: false,
   loading: () => (
@@ -83,17 +106,7 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
   return (
     <section className="relative h-screen min-h-[600px] max-h-[900px] overflow-hidden bg-[#000011]">
       {/* 3D Globe background — isolated error boundary */}
-      <GlobeErrorBoundary
-        fallback={
-          <div className="absolute inset-0 bg-[#000011] flex items-center justify-center">
-            <div className="text-center">
-              <span className="text-6xl mb-4 block">🌍</span>
-              <p className="text-sm text-white/40 font-mono">Globe unavailable</p>
-              <p className="text-xs text-white/20 mt-2">Try a WebGL-enabled browser</p>
-            </div>
-          </div>
-        }
-      >
+      <GlobeErrorBoundary>
         <GlobeScene projects={projects} onProjectClickRef={onProjectClickRef} />
       </GlobeErrorBoundary>
 

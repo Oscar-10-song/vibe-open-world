@@ -74,22 +74,6 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${schibstedGrotesk.variable} ${inter.variable} ${notoSans.variable} ${fustat.variable} antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('theme');
-                  if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                  }
-                } catch(e) {}
-              })();
-            `,
-          }}
-        />
-      </head>
       <body className="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
         <NavBar />
         <main className="flex-1">{children}</main>

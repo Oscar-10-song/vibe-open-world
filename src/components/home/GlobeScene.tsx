@@ -23,6 +23,13 @@ interface GlobeSceneProps {
 }
 
 // ============================================================
+// Module-level guard — prevents ANY re-initialization
+// across hot reloads, StrictMode double-mount, and parent re-renders
+// ============================================================
+let GLOBE_INSTANCE: any = null;
+let GLOBE_CLEANUP_REGISTERED = false;
+
+// ============================================================
 // Major city beacons
 // ============================================================
 const MAJOR_CITIES: { lat: number; lng: number; name: string }[] = [
@@ -109,21 +116,35 @@ function generatePoints(projects: ProjectWithRelations[]): GlobePoint[] {
 }
 
 // ============================================================
-// Safely remove the Three.js canvas from the container DOM.
-// globe.gl's _destructor() calls container.removeChild(canvas) internally,
-// but if React has already re-rendered or the canvas was reparented, this
-// throws: "Failed to execute 'removeChild' — node is not a child".
-// We remove it ourselves first so _destructor() sees parentNode === null and skips.
+// Destroy all canvas elements inside a container — safely.
+// Must run BEFORE globe._destructor() so the internal Preact
+// label cleanup doesn't try to removeChild on orphaned nodes.
 // ============================================================
-function safelyRemoveGlobeCanvas(container: HTMLElement | null) {
+function destroyGlobe(container: HTMLElement | null) {
   if (!container) return;
-  const canvas = container.querySelector('canvas');
-  if (canvas && canvas.parentNode) {
-    // Only remove if the canvas is actually a child of this container.
-    // After React reconciliation, canvas might have been moved or removed already.
-    if (canvas.parentNode === container) {
-      container.removeChild(canvas);
+
+  // Remove ALL canvas elements (globe.gl may create more than one)
+  const canvases = container.querySelectorAll('canvas');
+  canvases.forEach(canvas => {
+    try {
+      if (canvas.parentNode) {
+        canvas.parentNode.removeChild(canvas);
+      }
+    } catch {
+      // Parent might be null or canvas already detached — no-op
     }
+  });
+
+  // Destroy the globe instance — at this point all canvases are
+  // removed, so _destructor()'s internal removeChild calls are
+  // harmless (parentNode will be null → they skip).
+  if (GLOBE_INSTANCE) {
+    try {
+      GLOBE_INSTANCE._destructor?.();
+    } catch {
+      // _destructor may throw if internal state is partially initialized
+    }
+    GLOBE_INSTANCE = null;
   }
 }
 
@@ -132,74 +153,82 @@ function safelyRemoveGlobeCanvas(container: HTMLElement | null) {
 // ============================================================
 export function GlobeScene({ projects, onProjectClickRef, onError }: GlobeSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const globeEl = useRef<any>(null);
-  const cancelledRef = useRef(false);       // Track unmount across async boundaries
-  const hasInitialized = useRef(false);      // Prevent StrictMode double-mount
-  const projectsRef = useRef(projects);      // Always-current projects, avoids re-running effect
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [errorMsg, setErrorMsg] = useState('');
+  const mountedRef = useRef(true);
 
-  // Keep projects ref up to date without triggering effect re-run
-  projectsRef.current = projects;
+  // Track mounted state for async operations
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   useEffect(() => {
-    // Prevent double initialization (React StrictMode in dev, or rapid remounts)
-    if (hasInitialized.current) return;
-    hasInitialized.current = true;
+    // ==========================================================
+    // GUARD 1: Module-level — never initialize more than once
+    // ==========================================================
+    if (GLOBE_INSTANCE) {
+      // Globe already exists (hot reload, StrictMode remount, etc.)
+      // Just update status — the globe is still rendering in the DOM
+      setStatus('ready');
+      return;
+    }
+
+    // ==========================================================
+    // GUARD 2: Already registered cleanup — prevent double init
+    // ==========================================================
+    if (GLOBE_CLEANUP_REGISTERED) return;
+    GLOBE_CLEANUP_REGISTERED = true;
 
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      GLOBE_CLEANUP_REGISTERED = false;
+      return;
+    }
 
     let cancelled = false;
-    cancelledRef.current = false;
 
-    const initGlobe = async () => {
-      // Track step-by-step status for diagnostics
+    const init = async () => {
       let step = 'starting';
 
       try {
-        // Step 1: Import globe.gl
+        // ---- Import globe.gl ----
         step = 'importing globe.gl module';
         const globeModule = await import('globe.gl');
         const Globe = globeModule.default;
-        if (cancelledRef.current || !containerRef.current) return;
+        if (cancelled || !containerRef.current) return;
 
-        // Step 2: Try to load GeoJSON (non-blocking — globe works without it)
+        // ---- Fetch GeoJSON (non-blocking) ----
         step = 'fetching GeoJSON';
         let geojsonFeatures: any[] | null = null;
         try {
           const geojsonRes = await fetch('/ne_110m_admin_0_countries.geojson');
-          if (cancelledRef.current) return;
+          if (cancelled || !containerRef.current) return;
           if (geojsonRes.ok) {
             const geojsonData = await geojsonRes.json();
             geojsonFeatures = geojsonData.features || null;
           }
         } catch (geoErr) {
-          // GeoJSON failed — continue without country borders
           console.warn('[GlobeScene] GeoJSON fetch failed, continuing without borders:', geoErr);
         }
 
-        if (cancelledRef.current || !containerRef.current) return;
+        if (cancelled || !containerRef.current) return;
 
-        // Step 3: Generate points (use ref for latest projects)
+        // ---- Generate points ----
         step = 'generating points';
-        const points = generatePoints(projectsRef.current);
+        const points = generatePoints(projects);
 
-        // Step 4: Clean up any previous globe instance before creating a new one
-        if (globeEl.current) {
-          try {
-            safelyRemoveGlobeCanvas(containerRef.current);
-            globeEl.current._destructor?.();
-          } catch { /* ignore */ }
-          globeEl.current = null;
-        }
-
-        // Step 5: Create globe instance
+        // ---- Create globe instance (ONCE) ----
         step = 'creating globe instance';
+
+        // CRITICAL: Remove any previous globe elements before creating new one.
+        // destroyGlobe handles canvas removal before _destructor, preventing
+        // the "node is not a child" error from globe.gl's internal Preact cleanup.
+        destroyGlobe(containerRef.current);
+
         const globe = (Globe as any)()(containerRef.current);
 
-        // Re-check cancellation — globe constructor may have taken time
-        if (cancelledRef.current || !containerRef.current) {
+        if (cancelled || !containerRef.current) {
           try { globe._destructor?.(); } catch { /* ignore */ }
           return;
         }
@@ -210,14 +239,13 @@ export function GlobeScene({ projects, onProjectClickRef, onError }: GlobeSceneP
           globe.width(w).height(h);
         }
 
-        // Step 6: Configure globe
+        // ---- Configure globe ----
         step = 'configuring globe appearance';
         globe
           .backgroundColor('#08080f')
           .atmosphereColor('#1e1b4b')
           .atmosphereAltitude(0.25);
 
-        // Country borders — only if GeoJSON loaded successfully
         if (geojsonFeatures && geojsonFeatures.length > 0) {
           step = 'setting hex polygons';
           globe
@@ -231,7 +259,6 @@ export function GlobeScene({ projects, onProjectClickRef, onError }: GlobeSceneP
             });
         }
 
-        // Points (always set — works regardless of GeoJSON)
         step = 'setting points data';
         globe
           .pointsData(points)
@@ -248,7 +275,7 @@ export function GlobeScene({ projects, onProjectClickRef, onError }: GlobeSceneP
           .enablePointerInteraction(true)
           .showPointerCursor(true);
 
-        // Step 7: Controls
+        // ---- Controls ----
         step = 'setting controls';
         const controls = globe.controls();
         controls.autoRotate = true;
@@ -258,57 +285,61 @@ export function GlobeScene({ projects, onProjectClickRef, onError }: GlobeSceneP
         controls.minDistance = 130;
         controls.maxDistance = 600;
 
-        // Initial view
+        // ---- Initial view ----
         step = 'setting initial view';
         globe.pointOfView({ lat: 20, lng: 0, altitude: 2.2 }, 0);
 
-        globeEl.current = globe;
-        if (!cancelledRef.current) {
+        GLOBE_INSTANCE = globe;
+
+        if (!cancelled && mountedRef.current) {
           setStatus('ready');
         }
         console.log('[GlobeScene] Ready ✓  GeoJSON:', geojsonFeatures ? `${geojsonFeatures.length} countries` : 'none');
       } catch (err: any) {
-        if (cancelledRef.current) return; // Silently ignore errors after unmount
+        if (cancelled) return;
         const msg = err?.message || err?.toString?.() || 'Unknown error';
         const fullMsg = `[Step: ${step}] ${msg}`;
         console.error('[GlobeScene] Init failed:', fullMsg, err);
-        setErrorMsg(fullMsg);
-        setStatus('error');
-        onError?.(fullMsg);
+        if (mountedRef.current) {
+          setErrorMsg(fullMsg);
+          setStatus('error');
+          onError?.(fullMsg);
+        }
+        GLOBE_CLEANUP_REGISTERED = false;
       }
     };
 
-    // Small delay so the container is definitely laid out
+    // Small delay so the container has its final dimensions
     const timer = setTimeout(() => {
-      if (!cancelled) initGlobe();
+      if (!cancelled) init();
     }, 150);
 
     return () => {
       cancelled = true;
-      cancelledRef.current = true;
       clearTimeout(timer);
-      if (globeEl.current) {
-        // Safely remove canvas BEFORE calling _destructor().
-        // _destructor() internally does container.removeChild(canvas),
-        // which throws "node is not a child" if the canvas was already
-        // removed or reparented (e.g. by React reconciliation).
-        safelyRemoveGlobeCanvas(container);
-        try { globeEl.current._destructor?.(); } catch { /* ignore */ }
-        globeEl.current = null;
-      }
-      // Allow re-initialization on next mount (e.g. SPA navigation back)
-      hasInitialized.current = false;
+      // IMPORTANT: We do NOT destroy the globe on unmount.
+      // destroyGlobe is only called before creating a NEW globe instance.
+      // This prevents the "node is not a child" error that occurs when
+      // React cleanup races with globe.gl's internal DOM operations.
+      //
+      // The globe's WebGL context is released by the browser when the
+      // canvas element is removed from the DOM (which happens naturally
+      // when React unmounts the container div).
+      GLOBE_CLEANUP_REGISTERED = false;
     };
-  }, []); // Only run on mount — projects changes handled via ref
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // ^^^ EMPTY deps array is INTENTIONAL — globe must only be created once.
+  // projects changes do NOT require re-creating the globe instance.
+  // The module-level GLOBE_INSTANCE guard provides additional safety.
 
-  // Handle resize
+  // ---- Handle resize ----
   useEffect(() => {
     const onResize = () => {
-      if (globeEl.current && containerRef.current) {
+      if (GLOBE_INSTANCE && containerRef.current) {
         const w = containerRef.current.clientWidth;
         const h = containerRef.current.clientHeight;
         if (w && h) {
-          try { globeEl.current.width(w).height(h); } catch { /* ignore */ }
+          try { GLOBE_INSTANCE.width(w).height(h); } catch { /* ignore */ }
         }
       }
     };
@@ -330,7 +361,7 @@ export function GlobeScene({ projects, onProjectClickRef, onError }: GlobeSceneP
         </div>
       )}
 
-      {/* Error — shows FULL error message directly, no clicking needed */}
+      {/* Error state */}
       {status === 'error' && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#08080f]">
           <div className="text-center px-6 max-w-lg">

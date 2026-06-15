@@ -102,11 +102,11 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
   }, []);
 
   return (
-    <section className="relative h-screen min-h-[650px] max-h-[1000px] overflow-hidden bg-[#08080f]">
+    <section className="relative h-screen min-h-[700px] max-h-[1000px] overflow-hidden bg-[#08080f]">
       {/* ============================================================
-          Globe — fills right side on desktop, full width on mobile
+          Globe — right 50% on desktop (~640-720px wide), full width on mobile
           ============================================================ */}
-      <div className="absolute inset-0 lg:left-[42%] lg:inset-y-0">
+      <div className="absolute inset-0 lg:left-[50%] lg:inset-y-0">
         <GlobeErrorBoundary>
           <GlobeScene
             projects={projects}
@@ -118,9 +118,9 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
 
       {/* Globe gradient overlay — fade left edge on desktop */}
       <div
-        className="absolute inset-y-0 left-0 w-[48%] pointer-events-none z-[2] hidden lg:block"
+        className="absolute inset-y-0 left-0 w-[55%] pointer-events-none z-[2] hidden lg:block"
         style={{
-          background: 'linear-gradient(to right, #08080f 30%, rgba(8,8,15,0.85) 60%, rgba(8,8,15,0) 100%)',
+          background: 'linear-gradient(to right, #08080f 35%, rgba(8,8,15,0.82) 58%, rgba(8,8,15,0) 100%)',
         }}
       />
 

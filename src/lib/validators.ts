@@ -38,8 +38,8 @@ export const submitProjectSchema = z.object({
     .url('Please enter a valid GitHub URL')
     .optional()
     .or(z.literal('')),
-  category_id: z.string().uuid('Invalid category').optional(),
-  ai_tool_ids: z.array(z.string().uuid()).optional().default([]),
+  category_slug: z.string().optional().or(z.literal('')),
+  ai_tool_ids: z.array(z.string()).optional().default([]),
   tech_stack: z
     .array(z.string().max(30))
     .max(15, 'Maximum 15 tech stack items')
@@ -62,7 +62,7 @@ export type SubmitProjectInput = z.infer<typeof submitProjectSchema>;
 // ============================================================
 
 export const adminEditProjectSchema = submitProjectSchema.extend({
-  id: z.string().uuid(),
+  id: z.uuid(),
   status: z.enum(['pending', 'approved', 'rejected', 'featured']),
 });
 

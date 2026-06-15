@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminLoginSchema } from '@/lib/validators';
+import { deriveToken, getAdminPassword, getAdminUsername } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { username, password } = adminLoginSchema.parse(body);
 
-    const adminPassword = process.env.ADMIN_PASSWORD || 'vibeadmin123';
-    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+    const adminUsername = getAdminUsername();
+    const adminPassword = getAdminPassword();
 
     if (username !== adminUsername || password !== adminPassword) {
       return NextResponse.json(
@@ -16,10 +17,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const token = deriveToken(password);
+
     const response = NextResponse.json({ success: true });
 
-    // Set httpOnly cookie valid for 24 hours
-    response.cookies.set('admin_token', password, {
+    // Set httpOnly cookie with derived token (NOT the plaintext password)
+    response.cookies.set('admin_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

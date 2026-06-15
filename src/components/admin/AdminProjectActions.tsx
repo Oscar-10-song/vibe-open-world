@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface AdminProjectActionsProps {
   projectId: string;
@@ -46,6 +47,12 @@ export function AdminProjectActions({ projectId, currentStatus }: AdminProjectAc
         {currentStatus}
       </span>
       <div className="flex gap-1">
+        <Link
+          href={`/admin/projects/${projectId}/edit`}
+          className="text-xs px-2 py-1 rounded-md bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-colors no-underline"
+        >
+          ✎ Edit
+        </Link>
         {currentStatus !== 'approved' && currentStatus !== 'featured' && (
           <button
             onClick={() => updateStatus('approved')}

@@ -2,23 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { getMockProjects } from '@/lib/mock-data';
 
-// ============================================================
-// Auth helper
-// ============================================================
-function isAuthorized(request: NextRequest): boolean {
-  const token = request.cookies.get('admin_token')?.value;
-  const adminPassword = process.env.ADMIN_PASSWORD || 'vibeadmin123';
-  return token === adminPassword;
-}
+// Auth is handled by middleware.ts — all /api/admin/* routes are protected
 
 // ============================================================
 // GET — List all projects (including pending), newest first
 // ============================================================
-export async function GET(request: NextRequest) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export async function GET() {
   try {
     const sql = getDb();
     const res = await sql`
@@ -31,7 +20,6 @@ export async function GET(request: NextRequest) {
     `;
     return NextResponse.json({ success: true, projects: res });
   } catch {
-    // DB unavailable → use mock data
     const projects = getMockProjects().map(p => ({
       id: p.id,
       title: p.title,
@@ -49,34 +37,92 @@ export async function GET(request: NextRequest) {
 }
 
 // ============================================================
-// PATCH — Update project status (approve / reject / feature)
+// PATCH — Update project status OR edit project fields
 // ============================================================
 export async function PATCH(request: NextRequest) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
     const body = await request.json();
-    const { projectId, status } = body;
+    const { projectId } = body;
 
-    if (!projectId || !['pending', 'approved', 'rejected', 'featured'].includes(status)) {
+    if (!projectId) {
       return NextResponse.json(
-        { success: false, error: 'Invalid request. Required: projectId, status' },
+        { success: false, error: 'projectId is required' },
         { status: 400 }
       );
     }
 
     const sql = getDb();
-    await sql`
-      UPDATE projects SET status = ${status}, updated_at = NOW()
-      WHERE id = ${projectId}
-    `;
+
+    // ----- Status-only update (existing behavior) -----
+    if (body.status && !body.title && !body.tagline) {
+      const { status } = body;
+      if (!['pending', 'approved', 'rejected', 'featured'].includes(status)) {
+        return NextResponse.json(
+          { success: false, error: `Invalid status: ${status}` },
+          { status: 400 }
+        );
+      }
+      await sql`
+        UPDATE projects SET status = ${status}, updated_at = NOW()
+        WHERE id = ${projectId}
+      `;
+      return NextResponse.json({ success: true });
+    }
+
+    // ----- Full project edit -----
+    const { title, tagline, description, url, github_url, screenshot_url, category_slug } = body;
+
+    // Resolve category slug → UUID
+    let categoryId: string | null | undefined = undefined;
+    if (category_slug === '') {
+      categoryId = null; // explicitly clear
+    } else if (category_slug) {
+      const catRes = await sql`
+        SELECT id FROM categories WHERE slug = ${category_slug} LIMIT 1
+      `;
+      categoryId = catRes[0]?.id ?? null;
+    }
+
+    // Update only provided fields
+    const updates: string[] = [];
+    const now = 'NOW()';
+
+    if (title !== undefined) {
+      // Also update slug when title changes
+      const { slugify } = await import('@/lib/utils');
+      const newSlug = slugify(title);
+      updates.push(`title = '${title.replace(/'/g, "''")}'`);
+      updates.push(`slug = '${newSlug.replace(/'/g, "''")}'`);
+    }
+    if (tagline !== undefined) updates.push(`tagline = '${tagline.replace(/'/g, "''")}'`);
+    if (description !== undefined) {
+      const desc = description ? description.replace(/'/g, "''") : '';
+      updates.push(`description = ${description ? `'${desc}'` : 'NULL'}`);
+    }
+    if (url !== undefined) updates.push(`url = '${url.replace(/'/g, "''")}'`);
+    if (github_url !== undefined) {
+      const gh = github_url ? github_url.replace(/'/g, "''") : '';
+      updates.push(`github_url = ${github_url ? `'${gh}'` : 'NULL'}`);
+    }
+    if (screenshot_url !== undefined) updates.push(`screenshot_url = '${screenshot_url.replace(/'/g, "''")}'`);
+    if (categoryId !== undefined) {
+      updates.push(`category_id = ${categoryId ? `'${categoryId}'` : 'NULL'}`);
+    }
+    updates.push('updated_at = NOW()');
+
+    if (updates.length > 0) {
+      const setClause = updates.join(', ');
+      await sql.unsafe(`
+        UPDATE projects SET ${setClause}
+        WHERE id = '${projectId}'
+      `);
+    }
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error('Admin PATCH error:', error);
     return NextResponse.json(
-      { success: false, error: 'Database not connected. Status update unavailable.' },
+      { success: false, error: 'Failed to update project' },
       { status: 500 }
     );
   }

@@ -231,8 +231,8 @@ export function SubmitForm() {
               value: cat.slug,
               label: `${cat.icon} ${cat.name}`,
             }))}
-            {...register('category_id')}
-            error={errors.category_id?.message}
+            {...register('category_slug')}
+            error={errors.category_slug?.message}
           />
 
           {/* AI Tools multi-select */}

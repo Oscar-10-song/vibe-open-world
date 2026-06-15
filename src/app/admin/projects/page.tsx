@@ -1,10 +1,9 @@
 import { Container } from '@/components/layout/Container';
 import { AdminProjectActions } from '@/components/admin/AdminProjectActions';
+import { SignOutButton } from '@/components/admin/SignOutButton';
 import { formatDate } from '@/lib/utils';
 import { getDb } from '@/lib/db';
 import { getMockProjects } from '@/lib/mock-data';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -67,15 +66,6 @@ async function getProjects(): Promise<AdminProjectItem[]> {
 }
 
 export default async function AdminProjectsPage() {
-  // Auth check
-  const cookieStore = await cookies();
-  const token = cookieStore.get('admin_token')?.value;
-  const adminPassword = process.env.ADMIN_PASSWORD || 'vibeadmin123';
-
-  if (token !== adminPassword) {
-    redirect('/admin/login');
-  }
-
   const projects = await getProjects();
 
   const counts = {
@@ -94,12 +84,7 @@ export default async function AdminProjectsPage() {
           <h1 className="text-2xl font-bold text-[var(--color-text)]">Admin Dashboard</h1>
           <p className="text-sm text-[var(--color-text-secondary)]">Review and manage project submissions</p>
         </div>
-        <a
-          href="/admin/login"
-          className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-error)] transition-colors"
-        >
-          Sign Out
-        </a>
+        <SignOutButton />
       </div>
 
       {/* Stats */}

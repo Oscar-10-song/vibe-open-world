@@ -1,6 +1,84 @@
 -- ============================================================
--- Vibe Open World — Database Seed Script
+-- Vibe Open World — Database Schema + Seed Script
 -- 在 Neon / Vercel Postgres SQL Editor 中执行
+-- ============================================================
+
+-- ============================================================
+-- SCHEMA — CREATE TABLES
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS categories (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        VARCHAR(100) NOT NULL,
+  slug        VARCHAR(100) NOT NULL UNIQUE,
+  description TEXT,
+  icon        VARCHAR(10),
+  sort_order  INTEGER NOT NULL DEFAULT 0,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS ai_tools (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        VARCHAR(100) NOT NULL,
+  slug        VARCHAR(100) NOT NULL UNIQUE,
+  website     VARCHAR(500),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS authors (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        VARCHAR(100) NOT NULL,
+  email       VARCHAR(255) UNIQUE,
+  avatar_url  VARCHAR(500),
+  website     VARCHAR(500),
+  twitter     VARCHAR(100),
+  github      VARCHAR(100),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS projects (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title           VARCHAR(200) NOT NULL,
+  slug            VARCHAR(200) NOT NULL UNIQUE,
+  tagline         VARCHAR(300) NOT NULL,
+  description     TEXT,
+  url             VARCHAR(1000) NOT NULL,
+  github_url      VARCHAR(1000),
+  screenshot_url  VARCHAR(1000) NOT NULL,
+  category_id     UUID REFERENCES categories(id) ON DELETE SET NULL,
+  author_id       UUID NOT NULL REFERENCES authors(id) ON DELETE CASCADE,
+  status          VARCHAR(20) NOT NULL DEFAULT 'pending'
+                  CHECK (status IN ('pending', 'approved', 'rejected', 'featured')),
+  dev_duration    VARCHAR(50),
+  is_profitable   BOOLEAN NOT NULL DEFAULT false,
+  view_count      INTEGER NOT NULL DEFAULT 0,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  published_at    TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS project_ai_tools (
+  project_id  UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  ai_tool_id  UUID NOT NULL REFERENCES ai_tools(id) ON DELETE CASCADE,
+  PRIMARY KEY (project_id, ai_tool_id)
+);
+
+CREATE TABLE IF NOT EXISTS project_tech_stack (
+  project_id  UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  tech_name   VARCHAR(50) NOT NULL,
+  PRIMARY KEY (project_id, tech_name)
+);
+
+-- ============================================================
+-- INDEXES
+-- ============================================================
+CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
+CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_projects_category ON projects(category_id);
+CREATE INDEX IF NOT EXISTS idx_projects_author ON projects(author_id);
+
+-- ============================================================
+-- SEED DATA
 -- ============================================================
 
 -- 1. Categories

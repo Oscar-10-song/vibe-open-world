@@ -134,7 +134,7 @@ export function StatsSection({ totalProjects, totalBuilders, totalCategories, ne
           <div className="relative">
             <StatItem
               value={totalCategories.toLocaleString()}
-              label="Countries Covered"
+              label="Categories"
               index={2}
             />
             <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-12 bg-black/[0.06]" />

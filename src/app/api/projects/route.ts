@@ -21,7 +21,16 @@ export async function POST(request: NextRequest) {
     `;
     const authorId = authorRes[0]?.id;
 
-    // 2. Insert project (pending status)
+    // 2. Resolve category slug → UUID
+    let categoryId: string | null = null;
+    if (validated.category_slug) {
+      const catRes = await sql`
+        SELECT id FROM categories WHERE slug = ${validated.category_slug} LIMIT 1
+      `;
+      categoryId = catRes[0]?.id ?? null;
+    }
+
+    // 3. Insert project (pending status)
     const projectRes = await sql`
       INSERT INTO projects (
         title, slug, tagline, description, url, github_url,
@@ -31,7 +40,7 @@ export async function POST(request: NextRequest) {
         ${validated.title}, ${slug}, ${validated.tagline},
         ${validated.description || null}, ${validated.url},
         ${validated.github_url || null}, ${validated.screenshot_url},
-        ${validated.category_id || null}, ${authorId}, 'pending',
+        ${categoryId}, ${authorId}, 'pending',
         ${validated.dev_duration || null}, ${validated.is_profitable || false}
       )
       RETURNING id, slug
@@ -39,24 +48,27 @@ export async function POST(request: NextRequest) {
 
     const projectId = projectRes[0]?.id;
 
-    // 3. Insert AI Tools
+    // 4. Resolve AI tool slugs → UUIDs and insert
     if (validated.ai_tool_ids?.length > 0) {
-      const values = validated.ai_tool_ids.map(toolId => `(${projectId}, ${toolId})`).join(',');
-      await sql.unsafe(`
-        INSERT INTO project_ai_tools (project_id, ai_tool_id)
-        VALUES ${values}
-      `);
+      const toolRes = await sql`
+        SELECT id FROM ai_tools WHERE slug = ANY(${validated.ai_tool_ids})
+      `;
+      for (const row of toolRes as { id: string }[]) {
+        await sql`
+          INSERT INTO project_ai_tools (project_id, ai_tool_id)
+          VALUES (${projectId}, ${row.id})
+        `;
+      }
     }
 
-    // 4. Insert Tech Stack
+    // 5. Insert Tech Stack
     if (validated.tech_stack?.length > 0) {
-      const techValues = validated.tech_stack.map(tech =>
-        `(${projectId}, '${tech.replace(/'/g, "''")}')`
-      ).join(',');
-      await sql.unsafe(`
-        INSERT INTO project_tech_stack (project_id, tech_name)
-        VALUES ${techValues}
-      `);
+      for (const tech of validated.tech_stack) {
+        await sql`
+          INSERT INTO project_tech_stack (project_id, tech_name)
+          VALUES (${projectId}, ${tech})
+        `;
+      }
     }
 
     return NextResponse.json({

@@ -2,6 +2,7 @@ import { Container } from '@/components/layout/Container';
 import { AdminLoginForm } from '@/components/admin/AdminLoginForm';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { verifyToken } from '@/lib/auth';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -13,9 +14,8 @@ export default async function AdminLoginPage() {
   // Already logged in → redirect to dashboard
   const cookieStore = await cookies();
   const token = cookieStore.get('admin_token')?.value;
-  const adminPassword = process.env.ADMIN_PASSWORD || 'vibeadmin123';
 
-  if (token === adminPassword) {
+  if (verifyToken(token)) {
     redirect('/admin/projects');
   }
 

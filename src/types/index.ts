@@ -75,7 +75,7 @@ export interface SubmitProjectForm {
   // 选填
   description?: string;
   github_url?: string;
-  category_id?: string;
+  category_slug?: string;
   ai_tool_ids?: string[];
   tech_stack?: string[];
   dev_duration?: string;

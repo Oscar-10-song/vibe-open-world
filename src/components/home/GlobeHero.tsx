@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { ProjectWithRelations } from '@/types';
 
 // ============================================================
-// Error Boundary — isolates globe failures
+// Error Boundary — catches sync rendering errors from globe
 // ============================================================
 class GlobeErrorBoundary extends Component<
   { children: React.ReactNode },
@@ -24,22 +24,22 @@ class GlobeErrorBoundary extends Component<
     };
   }
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('[GlobeErrorBoundary]', error?.message, errorInfo?.componentStack);
+    console.error('[GlobeErrorBoundary] Sync error:', error?.message, errorInfo?.componentStack);
   }
   render() {
     if (this.state.hasError) {
       return (
         <div className="absolute inset-0 bg-[#08080f] flex items-center justify-center">
-          <div className="text-center max-w-md px-6">
-            <p className="text-sm text-white/30 font-mono">Globe unavailable</p>
-            <details className="mt-2">
-              <summary className="text-xs text-white/15 cursor-pointer hover:text-white/25 font-mono">
-                Error details
-              </summary>
-              <p className="text-xs text-white/12 mt-1 font-mono break-all">
-                {this.state.errorMessage}
-              </p>
-            </details>
+          <div className="text-center max-w-lg px-6">
+            <span className="text-4xl mb-3 block opacity-50">🌍</span>
+            <p className="text-sm text-white/50 font-mono mb-2">Globe unavailable</p>
+            {/* Error text shown directly — no click needed */}
+            <p className="text-xs text-white/25 font-mono break-all leading-relaxed bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 max-h-24 overflow-auto">
+              {this.state.errorMessage}
+            </p>
+            <p className="text-xs text-white/15 mt-3">
+              The rest of the page is available below.
+            </p>
           </div>
         </div>
       );
@@ -67,18 +67,16 @@ const GlobeScene = dynamic(
 );
 
 // ============================================================
-// Types
+// GlobeHero
 // ============================================================
 interface GlobeHeroProps {
   projects: ProjectWithRelations[];
 }
 
-// ============================================================
-// GlobeHero — Stripe-style left content + right globe
-// ============================================================
 export function GlobeHero({ projects }: GlobeHeroProps) {
   const [selectedProject, setSelectedProject] = useState<ProjectWithRelations | null>(null);
   const [cardVisible, setCardVisible] = useState(false);
+  const [globeError, setGlobeError] = useState<string | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const onProjectClickRef = useRef<((project: ProjectWithRelations) => void) | undefined>(undefined);
 
@@ -106,15 +104,19 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
   return (
     <section className="relative h-screen min-h-[650px] max-h-[1000px] overflow-hidden bg-[#08080f]">
       {/* ============================================================
-          Globe — right half
+          Globe — fills right side on desktop, full width on mobile
           ============================================================ */}
       <div className="absolute inset-0 lg:left-[42%] lg:inset-y-0">
         <GlobeErrorBoundary>
-          <GlobeScene projects={projects} onProjectClickRef={onProjectClickRef} />
+          <GlobeScene
+            projects={projects}
+            onProjectClickRef={onProjectClickRef}
+            onError={setGlobeError}
+          />
         </GlobeErrorBoundary>
       </div>
 
-      {/* Globe gradient overlay — fade right edge */}
+      {/* Globe gradient overlay — fade left edge on desktop */}
       <div
         className="absolute inset-y-0 left-0 w-[48%] pointer-events-none z-[2] hidden lg:block"
         style={{
@@ -142,7 +144,7 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
       />
 
       {/* ============================================================
-          Left content — text + CTAs (Stripe-style)
+          Left content — text + CTAs
           ============================================================ */}
       <div className="relative z-[3] h-full flex items-center">
         <div className="w-full max-w-[var(--content-width)] mx-auto px-6 sm:px-8 lg:px-12">
@@ -213,6 +215,13 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
               </Link>
             </motion.div>
 
+            {/* Globe error — shown directly in text area if globe fails */}
+            {globeError && (
+              <p className="mt-4 text-[11px] text-red-400/40 font-mono leading-relaxed">
+                ⚠ Globe: {globeError}
+              </p>
+            )}
+
             {/* Globe interaction hint */}
             <motion.p
               initial={{ opacity: 0 }}
@@ -232,7 +241,6 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
       <AnimatePresence>
         {selectedProject && (
           <>
-            {/* Click-outside overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -241,7 +249,6 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
               onClick={dismissCard}
             />
 
-            {/* Card */}
             <motion.div
               initial={{ opacity: 0, y: 16, scale: 0.96 }}
               animate={{
@@ -254,7 +261,6 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
               className="absolute bottom-24 right-8 z-[20] pointer-events-auto"
             >
               <div className="w-[340px] rounded-xl border border-white/[0.08] bg-[#0c0c18]/95 backdrop-blur-xl shadow-2xl shadow-black/50 overflow-hidden">
-                {/* Screenshot */}
                 <div className="relative aspect-[16/10] bg-[#0d0d20]">
                   <img
                     src={selectedProject.screenshot_url}
@@ -274,7 +280,6 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
                   </button>
                 </div>
 
-                {/* Info */}
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="min-w-0">
@@ -292,7 +297,6 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
                     )}
                   </div>
 
-                  {/* Meta */}
                   <div className="flex items-center gap-4 text-[11px] text-white/25 mb-3">
                     <span className="flex items-center gap-1">
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -310,7 +314,6 @@ export function GlobeHero({ projects }: GlobeHeroProps) {
                     )}
                   </div>
 
-                  {/* Action */}
                   <Link
                     href={`/projects/${selectedProject.slug}`}
                     onClick={dismissCard}

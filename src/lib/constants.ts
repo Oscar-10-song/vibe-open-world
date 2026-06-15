@@ -51,8 +51,8 @@ export const DEV_DURATION_OPTIONS = [
 // ============================================================
 export const SITE_CONFIG = {
   name: 'Vibe Open World',
-  tagline: 'Built with AI, Shipped by Humans',
-  description: 'Discover amazing projects built with AI coding tools. A showcase directory for vibe coders worldwide.',
+  tagline: 'Explore AI Creations Around The World',
+  description: 'Discover AI-generated artworks, videos, music, games and projects created by creators worldwide. A global showcase for AI-powered creativity.',
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://vibeopenworld.com',
   ogImage: '/images/og-default.png',
   twitter: '@vibeopenworld',

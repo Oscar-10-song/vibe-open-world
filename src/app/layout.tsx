@@ -15,22 +15,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vibe Open World — Built with AI, Shipped by Humans",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://vibe-open-world.vercel.app'),
+  title: "Vibe Open World — Explore AI Creations Around The World",
   description:
-    "Discover amazing projects built with AI coding tools. A showcase directory for vibe coders worldwide.",
+    "Discover AI-generated artworks, videos, music, games and projects created by creators worldwide. A global showcase for AI-powered creativity.",
   openGraph: {
-    title: "Vibe Open World — Built with AI, Shipped by Humans",
+    title: "Vibe Open World — Explore AI Creations Around The World",
     description:
-      "Discover amazing projects built with AI coding tools. A showcase directory for vibe coders worldwide.",
+      "Discover AI-generated artworks, videos, music, games and projects created by creators worldwide.",
     siteName: "Vibe Open World",
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vibe Open World — Built with AI, Shipped by Humans",
+    title: "Vibe Open World — Explore AI Creations Around The World",
     description:
-      "Discover amazing projects built with AI coding tools. A showcase directory for vibe coders worldwide.",
+      "Discover AI-generated artworks, videos, music, games and projects created by creators worldwide.",
   },
 };
 
@@ -52,8 +53,9 @@ export default function RootLayout({
               (function() {
                 try {
                   var theme = localStorage.getItem('theme');
-                  if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    document.documentElement.classList.add('dark');
+                  // dark is default — only switch to light if explicitly requested
+                  if (theme === 'light') {
+                    document.documentElement.classList.add('light');
                   }
                 } catch(e) {}
               })();

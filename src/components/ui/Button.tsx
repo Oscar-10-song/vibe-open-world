@@ -15,19 +15,19 @@ interface ButtonProps extends HTMLAttributes<HTMLElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] shadow-sm',
+    'bg-white text-[#0f1419] hover:bg-white/90 shadow-lg shadow-white/5',
   secondary:
-    'bg-[var(--color-bg-tertiary)] text-[var(--color-text)] hover:bg-[var(--color-border)]',
+    'bg-white/[0.04] text-white/60 border border-white/[0.1] hover:bg-white/[0.08] hover:text-white/80 hover:border-white/[0.15]',
   ghost:
-    'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-tertiary)]',
+    'text-white/45 hover:text-white/80 hover:bg-white/[0.04]',
   outline:
-    'border border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-border-hover)] hover:bg-[var(--color-bg-tertiary)]',
+    'border border-white/[0.1] text-white/60 hover:border-white/[0.15] hover:bg-white/[0.04] hover:text-white/80',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
   sm: 'px-3 py-1.5 text-sm rounded-lg gap-1.5',
-  md: 'px-5 py-2.5 text-sm rounded-xl gap-2',
-  lg: 'px-6 py-3 text-base rounded-xl gap-2',
+  md: 'px-5 py-2.5 text-sm rounded-lg gap-2',
+  lg: 'px-6 py-3 text-base rounded-lg gap-2',
 };
 
 export function Button({
@@ -41,7 +41,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const classes = [
-    'inline-flex items-center justify-center font-medium transition-colors',
+    'inline-flex items-center justify-center font-medium transition-all duration-200',
     variantClasses[variant],
     sizeClasses[size],
     disabled && 'opacity-50 pointer-events-none',

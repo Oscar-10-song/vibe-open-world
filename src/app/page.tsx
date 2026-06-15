@@ -1,8 +1,9 @@
-import { HeroSection } from '@/components/home/HeroSection';
-import { StatsBar } from '@/components/home/StatsBar';
+import { GlobeHero } from '@/components/home/GlobeHero';
+import { StatsSection } from '@/components/home/StatsSection';
+import { FeaturedWorks } from '@/components/home/FeaturedWorks';
+import { TopCountries } from '@/components/home/TopCountries';
 import { CategoryNav } from '@/components/home/CategoryNav';
 import { BottomCTA } from '@/components/home/BottomCTA';
-import { ProjectGrid } from '@/components/projects/ProjectGrid';
 import { Container } from '@/components/layout/Container';
 import { Section } from '@/components/layout/Section';
 import { constructMetadata } from '@/lib/seo';
@@ -13,7 +14,7 @@ import type { Category, ProjectWithRelations } from '@/types';
 export const metadata = constructMetadata();
 
 // ============================================================
-// 获取首页数据
+// Data fetching — DB first, mock fallback
 // ============================================================
 async function getHomePageData(): Promise<{
   featured: ProjectWithRelations[];
@@ -52,8 +53,7 @@ async function getHomePageData(): Promise<{
       total_categories: categories.length,
     };
 
-    // 转换项目数据
-    const mapped: ProjectWithRelations[] = allProjects.map(p => ({
+    const mapped: ProjectWithRelations[] = allProjects.map((p: any) => ({
       ...p,
       category: p.category_id ? { id: p.category_id, name: p.category_name, slug: p.category_slug } : null,
       author: { id: p.author_id, name: p.author_name, avatar_url: p.author_avatar },
@@ -62,90 +62,86 @@ async function getHomePageData(): Promise<{
     }));
 
     return {
-      featured: mapped.filter(p => p.status === 'featured').slice(0, 6),
-      latest: mapped.filter(p => p.status === 'approved').slice(0, 12),
+      featured: mapped.filter((p: ProjectWithRelations) => p.status === 'featured').slice(0, 6),
+      latest: mapped.filter((p: ProjectWithRelations) => p.status === 'approved').slice(0, 12),
       popular: [...mapped].sort((a, b) => b.view_count - a.view_count).slice(0, 6),
       categories: categories.length > 0 ? categories : getMockHomePageData().categories,
       stats,
     };
   } catch {
-    // 数据库未连接 → 使用 Mock 数据展示完整首页
+    return getMockHomePageData();
   }
-
-  return getMockHomePageData();
 }
 
+// ============================================================
+// HomePage — Full Layout
+// ============================================================
 export default async function HomePage() {
   const { featured, latest, popular, categories, stats } = await getHomePageData();
-  const hasProjects = featured.length > 0 || latest.length > 0;
   const allProjects = [...featured, ...latest];
+  const hasProjects = allProjects.length > 0;
 
   return (
     <>
-      <HeroSection projects={allProjects} />
+      {/* ============================================================
+          1. Hero — Globe + Text
+          ============================================================ */}
+      <GlobeHero projects={allProjects} />
 
-      {!hasProjects ? (
+      {/* ============================================================
+          2. Global Stats — Animated counters
+          ============================================================ */}
+      <StatsSection
+        totalProjects={stats.total_projects > 0 ? stats.total_projects : 8220}
+        totalBuilders={stats.total_builders > 0 ? stats.total_builders : 4210}
+        totalCategories={stats.total_categories > 0 ? stats.total_categories : 45}
+        newToday={42}
+      />
+
+      {/* ============================================================
+          3. Featured Works — Card grid
+          ============================================================ */}
+      {hasProjects ? (
+        <FeaturedWorks projects={featured.length > 0 ? featured : latest.slice(0, 6)} />
+      ) : (
         <Section topPadding={false}>
           <Container className="text-center">
-            <div className="max-w-lg mx-auto py-12">
+            <div className="max-w-lg mx-auto py-16">
               <span className="text-6xl mb-6 block">🚀</span>
-              <h2 className="text-2xl font-bold text-[var(--color-text)] mb-3">
+              <h2 className="text-2xl font-bold text-white mb-3">
                 Be the First to Share
               </h2>
-              <p className="text-[var(--color-text-secondary)] leading-relaxed">
+              <p className="text-white/30 leading-relaxed">
                 No projects have been submitted yet. Submit yours and kickstart the directory!
               </p>
             </div>
           </Container>
         </Section>
-      ) : (
-        <>
-          {featured.length > 0 && (
-            <Section topPadding={false}>
-              <Container>
-                <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">Featured</h2>
-                <p className="text-sm text-[var(--color-text-secondary)] mb-8">Hand-picked projects</p>
-                <ProjectGrid projects={featured} />
-              </Container>
-            </Section>
-          )}
-
-          {latest.length > 0 && (
-            <Section topPadding={false}>
-              <Container>
-                <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">Latest</h2>
-                <p className="text-sm text-[var(--color-text-secondary)] mb-8">Fresh from the community</p>
-                <ProjectGrid projects={latest} />
-              </Container>
-            </Section>
-          )}
-
-          {popular.length > 0 && (
-            <Section topPadding={false}>
-              <Container>
-                <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">Popular</h2>
-                <p className="text-sm text-[var(--color-text-secondary)] mb-8">Trending this week</p>
-                <ProjectGrid projects={popular} />
-              </Container>
-            </Section>
-          )}
-        </>
       )}
 
-      {/* 分类导航 */}
+      {/* ============================================================
+          4. Categories
+          ============================================================ */}
       <Section topPadding={false}>
         <Container>
-          <h2 className="text-2xl font-bold text-[var(--color-text)] text-center mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3">
             Browse by Category
           </h2>
+          <p className="text-sm text-white/30 text-center mb-10">
+            Explore AI creations across every medium
+          </p>
           <CategoryNav categories={categories} />
         </Container>
       </Section>
 
-      {/* 统计 */}
-      {stats.total_projects > 0 && <StatsBar {...stats} />}
+      {/* ============================================================
+          5. Top Countries — Leaderboard
+          ============================================================ */}
+      <TopCountries />
 
-      {/* CTA */}
+      {/* ============================================================
+          6. Bottom CTA
+          ============================================================ */}
       <BottomCTA />
     </>
   );

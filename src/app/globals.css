@@ -1,83 +1,86 @@
 @import "tailwindcss";
 
 /* ============================================================
-   Vibe Open World — Design System
-   极简 · 现代 · Product Hunt + Linear 风格
+   Vibe Open World — Premium Dark Design System
+   Stripe + GitHub + Linear 风格
    ============================================================ */
 
-/* ---- CSS 变量定义 ---- */
+/* ---- CSS Variables ---- */
 :root {
-  /* 颜色 */
-  --color-bg: #ffffff;
-  --color-bg-secondary: #f8f9fa;
-  --color-bg-tertiary: #f1f3f5;
-  --color-surface: #ffffff;
-  --color-border: #e9ecef;
-  --color-border-hover: #dee2e6;
+  /* Background */
+  --color-bg: #08080f;
+  --color-bg-secondary: #0c0c18;
+  --color-bg-tertiary: #111122;
+  --color-surface: #0f0f1e;
+  --color-surface-hover: #15152a;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-hover: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.1);
 
-  /* 文字 */
-  --color-text: #0f1419;
-  --color-text-secondary: #536471;
-  --color-text-tertiary: #8b98a5;
+  /* Text */
+  --color-text: #f0f0f5;
+  --color-text-secondary: #8888a0;
+  --color-text-tertiary: #5c5c78;
 
-  /* 强调色 — 橙/琥珀，呼应“Vibe” */
+  /* Accent — warm orange for CTAs */
   --color-accent: #f97316;
-  --color-accent-hover: #ea580c;
-  --color-accent-subtle: #fff7ed;
-  --color-accent-text: #c2410c;
+  --color-accent-hover: #fb923c;
+  --color-accent-subtle: rgba(249, 115, 22, 0.08);
+  --color-accent-text: #fdba74;
 
-  /* 功能色 */
-  --color-success: #10b981;
+  /* Accent Blue — for globe/scientific feel */
+  --color-accent-blue: #3b82f6;
+  --color-accent-blue-subtle: rgba(59, 130, 246, 0.08);
+
+  /* Functional */
+  --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
 
-  /* 阴影 — 极简，无大阴影 */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  /* Shadows — subtle on dark bg */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.15);
 
-  /* 圆角 */
+  /* Radius */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  /* 间距 */
-  --section-gap: 80px;
+  /* Spacing */
+  --section-gap: 100px;
   --content-width: 1200px;
   --content-width-narrow: 800px;
 
-  /* 动画 */
+  /* Transitions */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
 }
 
-/* ---- 深色模式 ---- */
-.dark {
-  --color-bg: #0a0a0b;
-  --color-bg-secondary: #141416;
-  --color-bg-tertiary: #1c1c1f;
-  --color-surface: #141416;
-  --color-border: #27272a;
-  --color-border-hover: #3f3f46;
-
-  --color-text: #fafafa;
-  --color-text-secondary: #a1a1aa;
-  --color-text-tertiary: #71717a;
-
-  --color-accent: #fb923c;
-  --color-accent-hover: #fdba74;
-  --color-accent-subtle: #1a1010;
-  --color-accent-text: #fdba74;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.15);
+/* ---- Light mode (for users who prefer it — dark is default) ---- */
+.light {
+  --color-bg: #fafafa;
+  --color-bg-secondary: #f4f4f5;
+  --color-bg-tertiary: #eaeaec;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f8f8fa;
+  --color-border: rgba(0, 0, 0, 0.06);
+  --color-border-hover: rgba(0, 0, 0, 0.12);
+  --color-border-strong: rgba(0, 0, 0, 0.1);
+  --color-text: #0f1419;
+  --color-text-secondary: #536471;
+  --color-text-tertiary: #8b98a5;
+  --color-accent-subtle: rgba(249, 115, 22, 0.06);
+  --color-accent-text: #c2410c;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.06);
 }
 
-/* ---- 基础重置 ---- */
+/* ---- Tailwind v4 Theme ---- */
 @theme inline {
   --color-background: var(--color-bg);
   --color-foreground: var(--color-text);
@@ -85,6 +88,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* ---- Base ---- */
 body {
   background: var(--color-bg);
   color: var(--color-text);
@@ -93,18 +97,33 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ---- 全局排版 ---- */
 ::selection {
-  background: var(--color-accent);
+  background: rgba(249, 115, 22, 0.3);
   color: white;
 }
 
-/* ---- 工具类 —— 用 Tailwind 做不到的精细控制 ---- */
+/* ---- Utilities ---- */
 .text-balance {
   text-wrap: balance;
 }
 
-/* ---- 卡片 hover 效果 ---- */
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
+/* ---- Card hover ---- */
 .card-hover {
   transition: border-color var(--transition-normal),
               box-shadow var(--transition-normal),
@@ -112,11 +131,11 @@ body {
 }
 .card-hover:hover {
   border-color: var(--color-border-hover);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-glow);
   transform: translateY(-2px);
 }
 
-/* ---- 链接基础样式 ---- */
+/* ---- Link ---- */
 a.text-link {
   color: var(--color-accent);
   text-decoration: none;
@@ -126,18 +145,34 @@ a.text-link:hover {
   color: var(--color-accent-hover);
 }
 
-/* ---- 滚动条美化（Webkit） ---- */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ---- Globe container specific ---- */
+.globe-container canvas {
+  display: block;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+/* ---- Noise texture overlay ---- */
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
 }
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
+
+/* ---- Animated gradient border ---- */
+@keyframes border-glow {
+  0%, 100% { border-color: rgba(99, 102, 241, 0.2); }
+  50% { border-color: rgba(99, 102, 241, 0.4); }
 }
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-hover);
+
+/* ---- Number counter animation ---- */
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-count-up {
+  animation: count-up 0.6s ease-out forwards;
 }

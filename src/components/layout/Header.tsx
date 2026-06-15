@@ -10,32 +10,37 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-[var(--color-bg)]/80 backdrop-blur-lg border-b border-[var(--color-border)]">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#08080f]/70 backdrop-blur-xl border-b border-white/[0.05]">
       <Container>
-        <nav className="flex items-center justify-between h-16">
+        <nav className="flex items-center justify-between h-14">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 font-semibold text-lg text-[var(--color-text)] no-underline">
-            <span className="text-xl">🌍</span>
-            <span className="hidden sm:inline">Vibe Open World</span>
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 font-semibold text-base text-white no-underline"
+          >
+            <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-xs">
+              🌍
+            </span>
+            <span className="hidden sm:inline tracking-tight">Vibe Open World</span>
           </Link>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
             <Link
               href="/"
-              className="px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] rounded-lg hover:bg-[var(--color-bg-tertiary)] transition-colors"
+              className="px-3 py-2 text-sm text-white/45 hover:text-white/80 rounded-lg hover:bg-white/[0.04] transition-colors"
             >
               Home
             </Link>
             <Link
-              href="/categories/saas"
-              className="px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] rounded-lg hover:bg-[var(--color-bg-tertiary)] transition-colors"
+              href="/explore"
+              className="px-3 py-2 text-sm text-white/45 hover:text-white/80 rounded-lg hover:bg-white/[0.04] transition-colors"
             >
-              Categories
+              Explore
             </Link>
             <Link
               href="/about"
-              className="px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] rounded-lg hover:bg-[var(--color-bg-tertiary)] transition-colors"
+              className="px-3 py-2 text-sm text-white/45 hover:text-white/80 rounded-lg hover:bg-white/[0.04] transition-colors"
             >
               About
             </Link>
@@ -51,7 +56,7 @@ export function Header() {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]"
+              className="md:hidden p-2 rounded-lg text-white/45 hover:text-white/80 hover:bg-white/[0.04] transition-colors"
               aria-label="Toggle menu"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -67,25 +72,25 @@ export function Header() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="md:hidden pb-4 border-t border-[var(--color-border)] pt-3 space-y-1">
+          <div className="md:hidden pb-4 border-t border-white/[0.05] pt-3 space-y-1">
             <Link
               href="/"
               onClick={() => setMobileOpen(false)}
-              className="block px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] rounded-lg hover:bg-[var(--color-bg-tertiary)]"
+              className="block px-3 py-2 text-sm text-white/45 hover:text-white/80 rounded-lg hover:bg-white/[0.04]"
             >
               Home
             </Link>
             <Link
-              href="/categories/saas"
+              href="/explore"
               onClick={() => setMobileOpen(false)}
-              className="block px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] rounded-lg hover:bg-[var(--color-bg-tertiary)]"
+              className="block px-3 py-2 text-sm text-white/45 hover:text-white/80 rounded-lg hover:bg-white/[0.04]"
             >
-              Categories
+              Explore
             </Link>
             <Link
               href="/about"
               onClick={() => setMobileOpen(false)}
-              className="block px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] rounded-lg hover:bg-[var(--color-bg-tertiary)]"
+              className="block px-3 py-2 text-sm text-white/45 hover:text-white/80 rounded-lg hover:bg-white/[0.04]"
             >
               About
             </Link>
